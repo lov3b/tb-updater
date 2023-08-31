@@ -135,7 +135,7 @@ mod conf {
         }
     }
 
-    const CONFIG_PATH: &'static str = "~/.config/tb-updater.json";
+    const CONFIG_PATH: &'static str = ".config/tb-updater.json";
 
     #[derive(Serialize, Deserialize)]
     pub struct Config {
@@ -151,12 +151,14 @@ mod conf {
         }
 
         pub fn load() -> Option<Self> {
-            let reader = BufReader::new(File::open(CONFIG_PATH).ok()?);
+            let home = env::var("HOME").unwrap();
+            let reader = BufReader::new(File::open(format!("{}/{}", home, CONFIG_PATH)).ok()?);
             serde_json::from_reader(reader).ok()
         }
 
         pub fn save(&self) -> Result<()> {
-            let mut writer = BufWriter::new(File::create(CONFIG_PATH)?);
+            let home = env::var("HOME").unwrap();
+            let mut writer = BufWriter::new(File::create(format!("{}/{}", home, CONFIG_PATH))?);
             serde_json::to_writer(&mut writer, &self)?;
             Ok(())
         }
