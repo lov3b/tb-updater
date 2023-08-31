@@ -110,7 +110,7 @@ mod conf {
             let home = env::var("HOME").unwrap();
             let dot_desktop = str::from_utf8(dot_desktop)
                 .expect("thunderbird.desktop wasn't UTF8")
-                .replace("PLACEHOLDER", &format!("{}/{}", home, thunderbird_dest));
+                .replace("PLACEHOLDER", thunderbird_dest);
             if let Err(_) = fs::write(DOT_DESKTOP_PATH.replace("~", &home), dot_desktop.as_bytes())
             {
                 eprintln!("Failed to write .desktop to {}", DOT_DESKTOP_PATH);
