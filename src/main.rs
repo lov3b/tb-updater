@@ -101,15 +101,19 @@ mod conf {
 
     use crate::Version;
 
-    const DOT_DESKTOP_PATH: &'static str = "~/.local/share/applications/thunderbird.desktop";
-    const SHARE_APPLICATIONS_DIR: &'static str = "~/.local/share/applications";
+    const APPLICATION_NAME: &'static str = "thunderbird.desktop";
+    const SHARE_APPLICATIONS_DIR: &'static str = ".local/share/applications";
 
     pub struct DotDesktop;
     impl DotDesktop {
         pub fn create(thunderbird_dest: &str) {
-            if fs::metadata(SHARE_APPLICATIONS_DIR).is_err() {
+            let home = env::var("HOME").unwrap();
+            let local_share_path = format!("{}/{}", home, SHARE_APPLICATIONS_DIR);
+            let dot_desktop_path = format!("{}/{}", &local_share_path, APPLICATION_NAME);
+
+            if fs::metadata(&local_share_path).is_err() {
                 fs::create_dir(SHARE_APPLICATIONS_DIR)
-                    .expect(&format!("Failed to create dir {}", SHARE_APPLICATIONS_DIR));
+                    .expect(&format!("Failed to create dir {}", local_share_path));
             }
 
             let dot_desktop = include_bytes!("thunderbird.desktop");
@@ -117,14 +121,17 @@ mod conf {
             let dot_desktop = str::from_utf8(dot_desktop)
                 .expect("thunderbird.desktop wasn't UTF8")
                 .replace("PLACEHOLDER", thunderbird_dest);
-            if let Err(_) = fs::write(DOT_DESKTOP_PATH.replace("~", &home), dot_desktop.as_bytes())
+            if let Err(_) = fs::write(dot_desktop_path.replace("~", &home), dot_desktop.as_bytes())
             {
-                eprintln!("Failed to write .desktop to {}", DOT_DESKTOP_PATH);
+                eprintln!("Failed to write .desktop to {}", &dot_desktop_path);
             }
         }
 
         pub fn exists() -> bool {
-            fs::metadata(DOT_DESKTOP_PATH).is_ok()
+            let home = env::var("HOME").unwrap();
+            let dot_desktop_path =
+                format!("{}/{}/{}", home, SHARE_APPLICATIONS_DIR, APPLICATION_NAME);
+            fs::metadata(dot_desktop_path).is_ok()
         }
     }
 
