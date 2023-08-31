@@ -102,10 +102,16 @@ mod conf {
     use crate::Version;
 
     const DOT_DESKTOP_PATH: &'static str = "~/.local/share/applications/thunderbird.desktop";
+    const SHARE_APPLICATIONS_DIR: &'static str = "~/.local/share/applications";
 
     pub struct DotDesktop;
     impl DotDesktop {
         pub fn create(thunderbird_dest: &str) {
+            if fs::metadata(SHARE_APPLICATIONS_DIR).is_err() {
+                fs::create_dir(SHARE_APPLICATIONS_DIR)
+                    .expect(&format!("Failed to create dir {}", SHARE_APPLICATIONS_DIR));
+            }
+
             let dot_desktop = include_bytes!("thunderbird.desktop");
             let home = env::var("HOME").unwrap();
             let dot_desktop = str::from_utf8(dot_desktop)
